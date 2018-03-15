@@ -171,6 +171,12 @@ public class DefaultTraversal<S, E> implements Traversal.Admin<S, E> {
         final TraversalParent parent = this.getParent();
         if (!(parent instanceof EmptyStep)) {
             parent.asStep().getTraversal().invalidateTraverserRequirements();
+            for (final Traversal.Admin<?, ?> localChild : parent.getLocalChildren()) {
+                if (localChild != this) localChild.invalidateTraverserRequirements();
+            }
+            for (final Traversal.Admin<?, ?> globalChild : parent.getGlobalChildren()) {
+                if (globalChild != this) globalChild.invalidateTraverserRequirements();
+            }
         }
     }
 
