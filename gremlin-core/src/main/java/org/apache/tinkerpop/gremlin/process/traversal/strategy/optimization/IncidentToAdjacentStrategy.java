@@ -111,12 +111,12 @@ public final class IncidentToAdjacentStrategy extends AbstractTraversalStrategy<
             newStep.addLabel(label);
         }
         TraversalHelper.replaceStep(step1, newStep, traversal);
+        traversal.removeStep(step2);
         if (step2 instanceof EdgeOtherVertexStep) {
             // bothE().otherV() might have been the only step sequence that required path tracking. Invalidate the
             // requirements to possibly end up with more optimized traversers.
             traversal.invalidateTraverserRequirements();
         }
-        traversal.removeStep(step2);
     }
 
     public static IncidentToAdjacentStrategy instance() {
@@ -152,5 +152,10 @@ public final class IncidentToAdjacentStrategy extends AbstractTraversalStrategy<
     @Override
     public Set<Class<? extends OptimizationStrategy>> applyPrior() {
         return Collections.singleton(IdentityRemovalStrategy.class);
+    }
+
+    @Override
+    public Set<Class<? extends OptimizationStrategy>> applyPost() {
+        return Collections.singleton(PathRetractionStrategy.class);
     }
 }
