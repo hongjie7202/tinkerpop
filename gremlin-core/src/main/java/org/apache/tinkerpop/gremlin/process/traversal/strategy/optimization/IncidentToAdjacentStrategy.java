@@ -23,6 +23,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.Step;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.TraversalStrategy;
 import org.apache.tinkerpop.gremlin.process.traversal.step.LambdaHolder;
+import org.apache.tinkerpop.gremlin.process.traversal.step.TraversalParent;
 import org.apache.tinkerpop.gremlin.process.traversal.step.filter.PathFilterStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.EdgeOtherVertexStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.EdgeVertexStep;
@@ -115,7 +116,7 @@ public final class IncidentToAdjacentStrategy extends AbstractTraversalStrategy<
         if (step2 instanceof EdgeOtherVertexStep) {
             // bothE().otherV() might have been the only step sequence that required path tracking. Invalidate the
             // requirements to possibly end up with more optimized traversers.
-            traversal.invalidateTraverserRequirements();
+            //traversal.invalidateTraverserRequirements();
         }
     }
 
@@ -137,6 +138,10 @@ public final class IncidentToAdjacentStrategy extends AbstractTraversalStrategy<
         final Collection<Pair<VertexStep, Step>> stepsToReplace = new ArrayList<>();
         Step prev = null;
         for (final Step curr : traversal.getSteps()) {
+            if (curr instanceof TraversalParent) {
+                ((TraversalParent) curr).getLocalChildren().forEach(this::apply);
+                ((TraversalParent) curr).getGlobalChildren().forEach(this::apply);
+            }
             if (isOptimizable(prev, curr)) {
                 stepsToReplace.add(Pair.with((VertexStep) prev, curr));
             }
